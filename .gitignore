@@ -1,0 +1,39 @@
+# ---- データ本体はgit管理外(READMEとCHECKSUMSだけ追跡) ----
+data/raw/*
+!data/raw/README.md
+!data/raw/CHECKSUMS.md5
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# ---- 機密情報(絶対にコミットしない) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+gdelt-news-*.json
+service_account*.json
+
+# ---- Python ----
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# ---- 大きな成果物 ----
+*.db
+*.sqlite
+*.parquet
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# ---- OS ----
+.DS_Store

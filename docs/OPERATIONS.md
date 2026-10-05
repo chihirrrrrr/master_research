@@ -35,6 +35,8 @@ make env        # 初回: .venv を作って依存を入れる
 make verify     # raw が CHECKSUMS.txt と一致するか
 make test       # テスト(raw の整合、データ契約)
 make freeze     # 最初の実験の前に、版を requirements.lock.txt に固定
+make fetch      # yfinanceから価格を取得(data/raw/prices_yfinance/<日付>/。上書きしない)
+make features   # 数値の特徴量と目的変数の候補を data/processed/ に作る
 ```
 - 実行は `.venv/bin/python -m src.data.xxx` のようにモジュールとして行う(`src/` はパッケージ)。
 - NLP(torch, transformers)は重いので `requirements-nlp.txt` に分けた(`make env-nlp`)。GPUが必要なら研究室のサーバーで実行する。

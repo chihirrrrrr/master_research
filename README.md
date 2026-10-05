@@ -34,6 +34,8 @@
 make env      # .venv を作って依存を入れる(Python 3.12)
 make verify   # data/raw の整合確認
 make test     # テスト
+make fetch    # yfinanceから価格を取得
+make features # 数値データ(特徴量・目的変数の候補)を作る
 ```
 
 ## データの入手

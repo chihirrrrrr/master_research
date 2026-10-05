@@ -2,6 +2,11 @@
 data/raw/*
 !data/raw/README.md
 !data/raw/CHECKSUMS.txt
+!data/raw/prices_yfinance/
+data/raw/prices_yfinance/*
+!data/raw/prices_yfinance/*/
+data/raw/prices_yfinance/*/*
+!data/raw/prices_yfinance/*/FETCH_LOG.md
 data/interim/*
 !data/interim/.gitkeep
 data/processed/*

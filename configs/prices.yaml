@@ -1,0 +1,52 @@
+# yfinance から取得する価格の設定(src/data/fetch_prices.py が読む)。
+# 期間は 2008-01-01〜2021-12-31(特徴量の助走期間と NYT の全期間を含める)。yfinance の end は「含まない」ので翌年の1月1日。
+period:
+  start: "2008-01-01"
+  end: "2022-01-01"
+
+# 取得する株式: news_price_events に出てくる銘柄(223。うち220が取得可の見込み)
+stocks:
+  source: data/raw/news_price_events/news_price_events.csv
+  column: stock
+
+# 生の値 + 調整後の値 + 配当・分割を保存する(後から調整済み価格を再現できるようにする)
+yfinance:
+  auto_adjust: false
+  actions: true
+  batch_size: 40
+
+# 市場・マクロ(ティッカー: 名前)。RESEARCH_PLAN.md §3-2。
+macro:
+  market:
+    "^GSPC": S&P500
+    "SPY": SPY(S&P500 ETF)
+    "^IXIC": NASDAQ総合
+    "^NDX": NASDAQ-100
+    "^SOX": SOX(半導体)
+  volatility:
+    "^VIX": VIX
+    "^VIX3M": VIX3M
+  rates:
+    "^IRX": 米3か月金利
+    "^FVX": 米5年金利
+    "^TNX": 米10年金利
+    "^TYX": 米30年金利
+  fx:
+    "DX-Y.NYB": ドル指数
+    "JPY=X": ドル円
+    "EURUSD=X": ユーロドル
+  commodities:
+    "CL=F": WTI原油先物
+    "BZ=F": Brent原油先物
+    "HG=F": 銅先物
+    "GC=F": 金先物
+  sectors:
+    "XLB": 素材
+    "XLE": エネルギー
+    "XLF": 金融
+    "XLI": 資本財
+    "XLK": テック
+    "XLP": 生活必需品
+    "XLU": 公益
+    "XLV": ヘルスケア
+    "XLY": 一般消費財

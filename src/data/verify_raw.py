@@ -1,5 +1,7 @@
 """data/raw/ の各ファイルが CHECKSUMS.txt と一致するか検証する。
 
+data/raw/ 直下の CHECKSUMS.txt に加えて、取得フォルダ(prices_yfinance/<日付>/)内の CHECKSUMS.txt も検証する。
+
 使い方(リポジトリのルートから):
     python src/data/verify_raw.py
 """
@@ -19,18 +21,22 @@ def md5(path: Path) -> str:
 
 
 def main() -> int:
-    bad = 0
-    lines = [l for l in (RAW / "CHECKSUMS.txt").read_text(encoding="utf-8").splitlines() if l.strip()]
-    for line in lines:
-        expected, rel = line.split(None, 1)
-        target = RAW / rel.strip()
-        if not target.exists():
-            print(f"MISSING   {rel}")
-            bad += 1
-        elif md5(target) != expected:
-            print(f"MISMATCH  {rel}")
-            bad += 1
-    print(f"{len(lines) - bad}/{len(lines)} files OK")
+    bad = total = 0
+    for sums in sorted(RAW.rglob("CHECKSUMS.txt")):
+        base = sums.parent
+        for line in sums.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            expected, rel = line.split(None, 1)
+            target = base / rel.strip()
+            total += 1
+            if not target.exists():
+                print(f"MISSING   {target.relative_to(RAW)}")
+                bad += 1
+            elif md5(target) != expected:
+                print(f"MISMATCH  {target.relative_to(RAW)}")
+                bad += 1
+    print(f"{total - bad}/{total} files OK")
     return 1 if bad else 0
 
 

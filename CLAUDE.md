@@ -5,7 +5,7 @@
 ## 研究の前提
 - 問い: 金融ニュースのテキストを、価格由来の数値特徴量に加えると、株価の予測は価格のみより改善するか。
 - 学部との違い: テキストのみ → テキスト + 数値。目的変数は**未決**(時間幅 × 種類の組み合わせを比較。RESEARCH_PLAN.md §4)。予測時点は取引日の寄り前(提案)。
-- 採用データ(US-1): `data/raw/news_price_events`(米国223銘柄、時刻つき見出し、ODC-By)+ `data/raw/nyt_headlines`(NYT「World」欄。補助)+ yfinance価格(**未取得**)。出典は data/raw/README.md。
+- 採用データ(US-1): `data/raw/news_price_events`(米国223銘柄、時刻つき見出し、ODC-By)+ `data/raw/nyt_headlines`(NYT「World」欄。補助)+ yfinance価格(取得済み: `data/raw/prices_yfinance/20261005/`)。数値の特徴量(A0)と目的変数の候補は `make features` で `data/processed/` に作る(27個。`src/features/numeric.py`)。出典は data/raw/README.md。
 
 ## ルール
 - `data/raw/` は**書き換えない**(読み取り専用)。加工は `src/` のスクリプトで行い、`data/interim/` → `data/processed/` に出力する。

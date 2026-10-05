@@ -6,6 +6,8 @@
 - 研究方針: [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md)(未決事項あり)
 - 運用方針: [docs/OPERATIONS.md](docs/OPERATIONS.md)
 - 決定の記録: [docs/DECISIONS.md](docs/DECISIONS.md)
+- 変数の運用方針(目的変数・説明変数): [docs/VARIABLES.md](docs/VARIABLES.md)
+- 日報: [docs/daily/](docs/daily/)
 - データセット評価: [docs/DATASET_評価_修士.md](docs/DATASET_評価_修士.md)
 
 ## ディレクトリ構成
@@ -22,7 +24,7 @@
    ├─ tests/  configs/  notebooks/
    ├─ results/{runs,tables,figures,logs}/   runs=1実験1ディレクトリ
    ├─ requirements.txt  Makefile  pytest.ini
-   └─ docs/        方針・決定・評価(docs/legacy/ は学部データ整理の旧メモ)
+   └─ docs/        方針・決定・評価・日報(docs/daily/)。docs/legacy/ は学部データ整理の旧メモ
 ```
 
 ## データの流れ

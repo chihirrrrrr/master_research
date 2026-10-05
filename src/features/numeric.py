@@ -8,9 +8,9 @@
       data/processed/numeric_targets.parquet    目的変数の候補(特徴量とは別ファイル。リーク防止)
       data/processed/numeric_meta.json          どの取得データから作ったか
 
-**時刻のルール**: 取引日 t の寄り前に予測する。特徴量はすべて「t-1 の終値までの情報」で、
-行 t の値は 1 営業日前に計算した値をずらしたもの。曜日・月だけは t の日付そのもの(事前に分かる)。
-目的変数は t 以降の価格を使う(特徴量には入れない)。
+**時刻のルール**: 予測の起点は「取引日 t の終了後(引け後、翌営業日 t+1 の寄り前)」。
+特徴量は t の終値までの情報(当日のデータを含む。過去の窓は t までの履歴)。曜日・月は t の日付そのもの。
+目的変数は t+1 以降の価格だけを使う(特徴量には入れない)。
 
 特徴量(27個。RESEARCH_PLAN.md §3-2):
   銘柄(own_)  : ret_1d, ret_5d, ret_20d, rv_5d, rv_20d, range_1d, gap_1d, volume_ratio, dist_ma50, dist_52wk_high
@@ -20,8 +20,11 @@
   商品         : wti_ret_5d, copper_ret_5d, gold_ret_5d
   テック       : sox_minus_nasdaq_5d
   カレンダー   : dow, month
-目的変数(§4-2): ret_gap(前日終値→始値)、ret_intraday(始値→終値)、ret_day(前日終値→終値)、ret_next(終値→翌日終値)と、
-                SPYの同じ4つ(spy_ret_*。超過リターン用)。値はすべて配当・分割調整済み。
+目的変数(docs/VARIABLES.md): 主は ret_fwd5(= 翌営業日 t+1 から5営業日 t+1..t+5 の日次リターンの平均。t は含まない)と、
+                その超過リターン ex_ret_fwd5(= 銘柄 − SPY)。副は ret_fwd1 / ex_ret_fwd1(翌営業日 t+1 のリターン)。
+                日次リターン r_s は前日終値→終値(配当・分割調整済み。夜間の動き=寄り付きのギャップを含む)。
+                診断用: ret_gap_fwd1(t の終値→t+1 の始値)、ret_intraday_fwd1(t+1 の始値→終値)。
+                spy_ret_*: SPYの同じ量(研究1の目的変数)。ex_ret_*: 銘柄 − SPY(市場調整の超過リターン)。
 """
 import json
 import sys
@@ -45,8 +48,9 @@ TECH_FEATURES = ["sox_minus_nasdaq_5d"]
 CALENDAR_FEATURES = ["dow", "month"]
 MACRO_FEATURES = MARKET_FEATURES + RATE_FEATURES + FX_FEATURES + COMMODITY_FEATURES + TECH_FEATURES
 FEATURE_COLUMNS = STOCK_FEATURES + MACRO_FEATURES + CALENDAR_FEATURES
-TARGET_COLUMNS = ["ret_gap", "ret_intraday", "ret_day", "ret_next",
-                  "spy_ret_gap", "spy_ret_intraday", "spy_ret_day", "spy_ret_next"]
+HORIZONS = ["fwd1", "fwd5", "gap_fwd1", "intraday_fwd1"]
+TARGET_COLUMNS = (["ret_" + h for h in HORIZONS] + ["spy_ret_" + h for h in HORIZONS]
+                  + ["ex_ret_" + h for h in HORIZONS])
 
 SYMBOLS = {"spx": "^GSPC", "vix": "^VIX", "vix3m": "^VIX3M", "tnx": "^TNX", "irx": "^IRX", "dxy": "DX-Y.NYB",
            "jpy": "JPY=X", "wti": "CL=F", "copper": "HG=F", "gold": "GC=F", "sox": "^SOX", "nasdaq": "^IXIC"}
@@ -72,7 +76,7 @@ def _adjust(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def stock_features(stocks: pd.DataFrame) -> pd.DataFrame:
-    """銘柄ごとの特徴量。行 t の値は、1行前(前営業日)の終値までから計算した値。"""
+    """銘柄ごとの特徴量。行 t の値は、t の終値までの情報(当日を含む)から計算した値。"""
     s = _adjust(stocks.sort_values(["ticker", "date"]).reset_index(drop=True))
     g = s.groupby("ticker", sort=False)
     lr = np.log(s["adj_close"]).groupby(s["ticker"]).diff()
@@ -89,13 +93,11 @@ def stock_features(stocks: pd.DataFrame) -> pd.DataFrame:
     f["own_dist_ma50"] = s["adj_close"] / g["adj_close"].transform(lambda x: x.rolling(50).mean()) - 1
     f["own_dist_52wk_high"] = s["adj_close"] / g["adj_close"].transform(lambda x: x.rolling(252).max()) - 1
     f[STOCK_FEATURES] = _clean(f[STOCK_FEATURES])
-    # 行 t には、1行前(t-1)で計算した値を入れる
-    f[STOCK_FEATURES] = f.groupby("ticker", sort=False)[STOCK_FEATURES].shift(1)
     return f
 
 
 def macro_features(macro: pd.DataFrame) -> pd.DataFrame:
-    """市場・マクロの特徴量(日付ごと)。S&P500の営業日を基準にし、1営業日ずらす。"""
+    """市場・マクロの特徴量(日付ごと)。S&P500の営業日を基準にし、行 t は t の終値までの値。"""
     wide = macro.pivot(index="date", columns="ticker", values="close").sort_index()
     cal = wide[SYMBOLS["spx"]].dropna().index
     w = wide.reindex(cal).ffill(limit=5)
@@ -117,26 +119,33 @@ def macro_features(macro: pd.DataFrame) -> pd.DataFrame:
     f["copper_ret_5d"] = safe_pct(c["copper"], 5)
     f["gold_ret_5d"] = safe_pct(c["gold"], 5)
     f["sox_minus_nasdaq_5d"] = safe_pct(c["sox"], 5) - safe_pct(c["nasdaq"], 5)
-    f = _clean(f[MACRO_FEATURES]).shift(1)  # 行 t は t-1 の終値までの値
+    f = _clean(f[MACRO_FEATURES])  # 行 t は t の終値までの値(当日を含む)
     f.index.name = "date"
     return f.reset_index()
 
 
 def targets(stocks: pd.DataFrame, macro: pd.DataFrame) -> pd.DataFrame:
-    """目的変数の候補(t 以降の価格を使う。特徴量には入れない)。"""
+    """目的変数(t の翌営業日 t+1 以降の価格だけを使う。特徴量には入れない)。"""
     def returns(df: pd.DataFrame) -> pd.DataFrame:
         s = _adjust(df.sort_values(["ticker", "date"]).reset_index(drop=True))
-        g = s.groupby("ticker", sort=False)["adj_close"]
+        grp = s.groupby("ticker", sort=False)
+        g = grp["adj_close"]
         out = pd.DataFrame({"ticker": s["ticker"], "date": s["date"]})
-        out["ret_gap"] = s["adj_open"] / g.shift(1) - 1
-        out["ret_intraday"] = s["adj_close"] / s["adj_open"] - 1
-        out["ret_day"] = g.pct_change()
-        out["ret_next"] = g.shift(-1) / s["adj_close"] - 1
+        r = g.pct_change()  # 日次リターン r_s(前日終値→終値)
+        out["ret_fwd1"] = r.groupby(s["ticker"], sort=False).shift(-1)  # r_{t+1} = t の終値 → t+1 の終値
+        # 翌営業日 t+1 から5営業日(t+1, ..., t+5)の日次リターンの平均。t は含まない。窓に欠損があれば欠損
+        out["ret_fwd5"] = sum(r.groupby(s["ticker"], sort=False).shift(-k) for k in range(1, 6)) / 5
+        nxt_open = grp["adj_open"].shift(-1)
+        nxt_close = g.shift(-1)
+        out["ret_gap_fwd1"] = nxt_open / s["adj_close"] - 1        # t の終値 → t+1 の始値(夜間)
+        out["ret_intraday_fwd1"] = nxt_close / nxt_open - 1        # t+1 の始値 → 終値
         return out
     t = returns(stocks)
     spy = returns(macro[macro["ticker"] == "SPY"]).drop(columns="ticker")
     spy = spy.rename(columns={c: "spy_" + c for c in spy.columns if c != "date"})
     t = t.merge(spy, on="date", how="left")
+    for h in HORIZONS:  # 超過リターン = 銘柄 − SPY(同じ時間幅)
+        t["ex_ret_" + h] = t["ret_" + h] - t["spy_ret_" + h]
     t[TARGET_COLUMNS] = _clean(t[TARGET_COLUMNS])
     return t[["ticker", "date"] + TARGET_COLUMNS]
 

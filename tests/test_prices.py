@@ -67,11 +67,11 @@ def test_processed_shapes_and_alignment():
 @needs_processed
 @pytest.mark.skipif(not NPE.exists(), reason="news_price_events が無い環境")
 def test_reproduces_authors_label():
-    # 自分で作った翌日の絶対リターンが、news_price_events の forward_return と一致する(価格の整合の確認)
+    # 自分で作った翌営業日の絶対リターン(t の終値 → t+1 の終値)が、news_price_events の forward_return と一致する(価格の整合の確認)
     t = pd.read_parquet(PROCESSED / "numeric_targets.parquet")
     n = pd.read_csv(NPE, usecols=["stock", "trade_date", "forward_return"], low_memory=False)
     n = n.drop_duplicates(["stock", "trade_date"])
     n["trade_date"] = pd.to_datetime(n["trade_date"])
-    m = n.merge(t[["ticker", "date", "ret_next"]], left_on=["stock", "trade_date"], right_on=["ticker", "date"]).dropna()
+    m = n.merge(t[["ticker", "date", "ret_fwd1"]], left_on=["stock", "trade_date"], right_on=["ticker", "date"]).dropna()
     assert len(m) > 150_000
-    assert ((m["ret_next"].abs() - m["forward_return"]).abs() < 1e-3).mean() > 0.999
+    assert ((m["ret_fwd1"].abs() - m["forward_return"]).abs() < 1e-3).mean() > 0.999

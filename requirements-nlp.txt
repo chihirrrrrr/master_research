@@ -1,0 +1,4 @@
+# NLP(埋め込み・FinBERT)用。重いので別ファイルにしている。GPUサーバーでは `pip install -r requirements.txt -r requirements-nlp.txt`。
+# CUDA版のtorchが必要な場合は、torchの公式の手順に従って先に入れる。
+torch>=2.2
+transformers>=4.40

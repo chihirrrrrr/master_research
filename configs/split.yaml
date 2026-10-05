@@ -1,0 +1,17 @@
+# データ分割の定義(1か所にまとめる)。**暫定**: news_price_events の作者の推奨分割に合わせている(他の利用者と比較できるため)。
+# テスト期間は最後まで見ない(設計の選択・ハイパーパラメータ調整は検証期間だけで行う)。docs/RESEARCH_PLAN.md §5。
+# 注意: テスト期間(2020-01〜06)は新型コロナの急落を含み、期間が短い(約5.5か月)。
+
+split:
+  train: {start: "2009-04-29", end: "2017-12-31"}
+  val:   {start: "2018-01-01", end: "2019-12-31"}
+  test:  {start: "2020-01-01", end: "2020-06-12"}
+
+# 学習・検証の内部では、拡張窓のwalk-forwardで評価する(値は仮置き)。
+walk_forward:
+  scheme: expanding
+  min_train_years: 3
+  step_months: 6
+
+# 同じ取引日の行は、必ず同じ側(train/val/test、各fold)に入れる。
+group_by: trade_date

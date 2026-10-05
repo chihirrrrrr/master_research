@@ -1,7 +1,7 @@
 # ---- データ本体はgit管理外(READMEとCHECKSUMSだけ追跡) ----
 data/raw/*
 !data/raw/README.md
-!data/raw/CHECKSUMS.md5
+!data/raw/CHECKSUMS.txt
 data/interim/*
 !data/interim/.gitkeep
 data/processed/*
@@ -24,6 +24,9 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
+# ---- 実験の大きな成果物(config・metrics・notesは追跡) ----
+results/runs/*/artifacts/
+
 # ---- 大きな成果物 ----
 *.db
 *.sqlite
@@ -35,5 +38,7 @@ __pycache__/
 *.ckpt
 *.safetensors
 
-# ---- OS ----
+# ---- OS・エディタ ----
 .DS_Store
+*.swp
+*.swo

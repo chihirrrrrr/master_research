@@ -50,7 +50,7 @@ def perturb(df: pd.DataFrame, from_date: pd.Timestamp) -> pd.DataFrame:
 
 
 def test_feature_count_and_no_target_names():
-    assert len(nm.FEATURE_COLUMNS) == 27
+    assert len(nm.FEATURE_COLUMNS) == 25 and not {'dxy_ret_5d', 'usdjpy_ret_5d'} & set(nm.FEATURE_COLUMNS)
     assert not set(nm.FEATURE_COLUMNS) & set(nm.TARGET_COLUMNS)
     assert not any(c.startswith(("ret_", "spy_ret_", "ex_ret_")) for c in nm.FEATURE_COLUMNS)
 

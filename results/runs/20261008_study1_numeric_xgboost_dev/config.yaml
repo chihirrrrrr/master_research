@@ -1,0 +1,53 @@
+args:
+  features: numeric
+  periods: dev
+  final: false
+  model: xgboost
+  row_set: numeric
+split:
+  rows: 営業日 3,499日(2008-01-31〜2021-12-23)
+  first_train:
+    start: '2008-01-31'
+    end: '2012-12-31'
+  test_years:
+  - 2013
+  - 2014
+  - 2015
+  - 2016
+  - 2017
+  - 2018
+  - 2019
+  - 2020
+  - 2021
+  embargo_days: 4
+  development:
+    first: 2013
+    last: 2017
+  confirmation:
+    first: 2018
+    last: 2021
+  inner_validation:
+    share: 0.2
+    order: time
+model:
+  target: spx_ret_fwd5
+  model:
+    n_estimators_max: 500
+    early_stopping_rounds: 30
+    learning_rate: 0.03
+    subsample: 0.7
+    colsample_bytree: 0.7
+    reg_lambda: 10
+    grid:
+      max_depth:
+      - 2
+      - 3
+      min_child_weight:
+      - 20
+      - 50
+    seeds:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4

@@ -1,0 +1,14 @@
+# 研究1のXGBoost: 正則化を強めた設定(強い)。2026-10-08。
+# 木の深さは1(切り株)だけ、葉の最小サンプルは100〜200、学習率0.01、行の抽出率0.6、列の抽出率0.5、reg_lambda 200。
+target: spx_ret_fwd5
+model:
+  n_estimators_max: 300
+  early_stopping_rounds: 30
+  learning_rate: 0.01
+  subsample: 0.6
+  colsample_bytree: 0.5
+  reg_lambda: 200
+  grid:
+    max_depth: [1]
+    min_child_weight: [100, 200]
+  seeds: [0, 1, 2, 3, 4]

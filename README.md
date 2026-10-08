@@ -38,6 +38,7 @@ make verify   # data/raw の整合確認
 make test     # テスト
 make fetch    # yfinanceから価格を取得
 make features # 数値データ(特徴量・目的変数の候補)を作る
+make market-base # 研究1の土台の表(S&P500のOHLC + 金利)を作る
 ```
 
 ## データの入手

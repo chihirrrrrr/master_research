@@ -1,0 +1,160 @@
+{
+  "feature_set": "numeric+nyt",
+  "periods": "dev",
+  "model": "xgboost",
+  "target": "spx_ret_fwd5",
+  "n_features": 23,
+  "features": [
+    "spx_ret_1d",
+    "spx_ret_5d",
+    "spx_rv_20d",
+    "vix_level",
+    "vix_chg_1d",
+    "vix_term",
+    "tnx_level",
+    "tnx_chg_5d",
+    "term_spread",
+    "wti_ret_5d",
+    "copper_ret_5d",
+    "gold_ret_5d",
+    "sox_minus_nasdaq_5d",
+    "dow",
+    "month",
+    "spx_range_1d",
+    "spx_gap_1d",
+    "spx_close_loc",
+    "nyt_pos",
+    "nyt_neg",
+    "nyt_neu",
+    "nyt_net_ma5",
+    "nyt_neg_ma5"
+  ],
+  "row_set": "common",
+  "n_rows": 3211,
+  "first_date": "2008-01-31",
+  "last_date": "2021-12-23",
+  "folds": [
+    {
+      "year": 2013,
+      "n_train": 1147,
+      "n_test": 237,
+      "best": {
+        "max_depth": 1,
+        "min_child_weight": 100,
+        "n_estimators": 213,
+        "inner_val_rmse": 33.72737977174249
+      },
+      "r2_os": 0.038129877560561964,
+      "rmse_model": 28.351757639539823,
+      "rmse_hist": 28.908247897096153,
+      "corr": -0.06845490031956969,
+      "hit_model": 0.6582278481012658,
+      "hit_hist": 0.6624472573839663
+    },
+    {
+      "year": 2014,
+      "n_train": 1384,
+      "n_test": 229,
+      "best": {
+        "max_depth": 1,
+        "min_child_weight": 50,
+        "n_estimators": 150,
+        "inner_val_rmse": 29.697464371012835
+      },
+      "r2_os": -0.0033930326837479097,
+      "rmse_model": 33.39040011543683,
+      "rmse_hist": 33.33389650434079,
+      "corr": -0.03996327162314898,
+      "hit_model": 0.5938864628820961,
+      "hit_hist": 0.5938864628820961
+    },
+    {
+      "year": 2015,
+      "n_train": 1613,
+      "n_test": 217,
+      "best": {
+        "max_depth": 1,
+        "min_child_weight": 50,
+        "n_estimators": 74,
+        "inner_val_rmse": 31.402691793823276
+      },
+      "r2_os": 0.00034023103196823,
+      "rmse_model": 35.75206696324632,
+      "rmse_hist": 35.75815049696451,
+      "corr": 0.17089834682012064,
+      "hit_model": 0.5806451612903226,
+      "hit_hist": 0.5806451612903226
+    },
+    {
+      "year": 2016,
+      "n_train": 1830,
+      "n_test": 211,
+      "best": {
+        "max_depth": 2,
+        "min_child_weight": 50,
+        "n_estimators": 282,
+        "inner_val_rmse": 34.25883451528358
+      },
+      "r2_os": 0.004231566820487864,
+      "rmse_model": 32.51833627600333,
+      "rmse_hist": 32.58735715969338,
+      "corr": 0.10559296412141235,
+      "hit_model": 0.6113744075829384,
+      "hit_hist": 0.6066350710900474
+    },
+    {
+      "year": 2017,
+      "n_train": 2041,
+      "n_test": 236,
+      "best": {
+        "max_depth": 2,
+        "min_child_weight": 50,
+        "n_estimators": 333,
+        "inner_val_rmse": 33.633519425637246
+      },
+      "r2_os": -0.03342782970447633,
+      "rmse_model": 16.437181932022842,
+      "rmse_hist": 16.16915356545919,
+      "corr": 0.13896955057520224,
+      "hit_model": 0.652542372881356,
+      "hit_hist": 0.6864406779661016
+    }
+  ],
+  "pooled": {
+    "n_test": 1130,
+    "r2_os": 0.0055807389044478795,
+    "rmse_model": 29.89771504718096,
+    "rmse_hist": 29.981491532488985,
+    "corr": 0.030093904612734403,
+    "hit_model": 0.620353982300885,
+    "hit_hist": 0.6274336283185841,
+    "up_share": 0.6274336283185841,
+    "clark_west_vs_hist": {
+      "mean": 29.146392310815912,
+      "t": 1.548694022842137,
+      "p_one_sided": 0.06072764570867484,
+      "lag": 5
+    },
+    "direction": {
+      "accuracy": 0.620353982300885,
+      "balanced_accuracy": 0.5006298389555395,
+      "f1_up": 0.7623268698060942,
+      "auc": 0.46878611942148624,
+      "pred_up_share": 0.9699115044247788,
+      "always_up_accuracy": 0.6274336283185841,
+      "always_up_f1": 0.7710712343665035,
+      "pred_std": 3.8278273921087123,
+      "y_std": 29.76618123891242
+    }
+  },
+  "importance_top": {
+    "tnx_level": 0.09706021398305893,
+    "spx_rv_20d": 0.0743114173412323,
+    "spx_range_1d": 0.07216253206133842,
+    "spx_ret_1d": 0.06411847770214081,
+    "vix_chg_1d": 0.05928097292780876,
+    "tnx_chg_5d": 0.054184263199567796,
+    "copper_ret_5d": 0.05386239439249039,
+    "spx_ret_5d": 0.05298034697771072
+  }
+}

@@ -12,11 +12,10 @@
 特徴量は t の終値までの情報(当日のデータを含む。過去の窓は t までの履歴)。曜日・月は t の日付そのもの。
 目的変数は t+1 以降の価格だけを使う(特徴量には入れない)。
 
-特徴量(27個。RESEARCH_PLAN.md §3-2):
+特徴量(25個。為替は含めない: 2026-10-08の決定。RESEARCH_PLAN.md §3-2):
   銘柄(own_)  : ret_1d, ret_5d, ret_20d, rv_5d, rv_20d, range_1d, gap_1d, volume_ratio, dist_ma50, dist_52wk_high
   市場         : spx_ret_1d, spx_ret_5d, spx_rv_20d, vix_level, vix_chg_1d, vix_term
   金利         : tnx_level, tnx_chg_5d, term_spread
-  為替         : dxy_ret_5d, usdjpy_ret_5d
   商品         : wti_ret_5d, copper_ret_5d, gold_ret_5d
   テック       : sox_minus_nasdaq_5d
   カレンダー   : dow, month
@@ -42,18 +41,17 @@ STOCK_FEATURES = ["own_ret_1d", "own_ret_5d", "own_ret_20d", "own_rv_5d", "own_r
                   "own_gap_1d", "own_volume_ratio", "own_dist_ma50", "own_dist_52wk_high"]
 MARKET_FEATURES = ["spx_ret_1d", "spx_ret_5d", "spx_rv_20d", "vix_level", "vix_chg_1d", "vix_term"]
 RATE_FEATURES = ["tnx_level", "tnx_chg_5d", "term_spread"]
-FX_FEATURES = ["dxy_ret_5d", "usdjpy_ret_5d"]
 COMMODITY_FEATURES = ["wti_ret_5d", "copper_ret_5d", "gold_ret_5d"]
 TECH_FEATURES = ["sox_minus_nasdaq_5d"]
 CALENDAR_FEATURES = ["dow", "month"]
-MACRO_FEATURES = MARKET_FEATURES + RATE_FEATURES + FX_FEATURES + COMMODITY_FEATURES + TECH_FEATURES
+MACRO_FEATURES = MARKET_FEATURES + RATE_FEATURES + COMMODITY_FEATURES + TECH_FEATURES
 FEATURE_COLUMNS = STOCK_FEATURES + MACRO_FEATURES + CALENDAR_FEATURES
 HORIZONS = ["fwd1", "fwd5", "gap_fwd1", "intraday_fwd1"]
 TARGET_COLUMNS = (["ret_" + h for h in HORIZONS] + ["spy_ret_" + h for h in HORIZONS]
                   + ["ex_ret_" + h for h in HORIZONS])
 
-SYMBOLS = {"spx": "^GSPC", "vix": "^VIX", "vix3m": "^VIX3M", "tnx": "^TNX", "irx": "^IRX", "dxy": "DX-Y.NYB",
-           "jpy": "JPY=X", "wti": "CL=F", "copper": "HG=F", "gold": "GC=F", "sox": "^SOX", "nasdaq": "^IXIC"}
+SYMBOLS = {"spx": "^GSPC", "vix": "^VIX", "vix3m": "^VIX3M", "tnx": "^TNX", "irx": "^IRX",
+           "wti": "CL=F", "copper": "HG=F", "gold": "GC=F", "sox": "^SOX", "nasdaq": "^IXIC"}
 
 
 def safe_pct(s: pd.Series, n: int = 1) -> pd.Series:
@@ -113,8 +111,6 @@ def macro_features(macro: pd.DataFrame) -> pd.DataFrame:
     f["tnx_level"] = c["tnx"]
     f["tnx_chg_5d"] = c["tnx"].diff(5)
     f["term_spread"] = c["tnx"] - c["irx"]
-    f["dxy_ret_5d"] = safe_pct(c["dxy"], 5)
-    f["usdjpy_ret_5d"] = safe_pct(c["jpy"], 5)
     f["wti_ret_5d"] = safe_pct(c["wti"], 5)
     f["copper_ret_5d"] = safe_pct(c["copper"], 5)
     f["gold_ret_5d"] = safe_pct(c["gold"], 5)

@@ -1,0 +1,15 @@
+# 研究1(S&P500)のXGBoostの設定。決定: 2026-10-08(docs/VARIABLES.md §6)。出発点の値。
+# XGBoostにバッチ数はない(全データを毎回まとめて学習する)。
+target: spx_ret_fwd5          # S&P500指数の t+1〜t+5 の日次リターンの平均(bp)
+
+model:
+  n_estimators_max: 500       # 木の数の上限
+  early_stopping_rounds: 30   # 検証で30回改善しなければ止める
+  learning_rate: 0.03
+  subsample: 0.7              # 行の抽出率
+  colsample_bytree: 0.7       # 列の抽出率
+  reg_lambda: 10              # 正則化
+  grid:                       # 学習期間の内側の検証(時間順)で選ぶ
+    max_depth: [2, 3]
+    min_child_weight: [20, 50]
+  seeds: [0, 1, 2, 3, 4]      # 最終モデルは、5つの乱数の予測を平均する

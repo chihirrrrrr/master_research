@@ -15,6 +15,8 @@
 目的変数(単位 bp = 1/10000):
   spx_ret_fwd5 : S&P500指数(^GSPC の終値)の、t+1〜t+5 の日次リターンの平均(t は含まない)
   spx_ret_fwd1 : t+1 の日次リターン
+  spx_cum_fwd5 : 5日累積リターン = 終値(t+5) / 終値(t) − 1(t の終値から、5営業日先の終値まで)
+  spx_cum_fwd10, spx_cum_fwd20 : 同じく、10・20営業日先まで
 """
 import json
 import sys
@@ -30,7 +32,7 @@ OUT = ROOT / "data" / "processed"
 
 OHLC_FEATURES = ["spx_range_1d", "spx_gap_1d", "spx_close_loc"]
 MARKET_FEATURES = nm.MACRO_FEATURES + nm.CALENDAR_FEATURES + OHLC_FEATURES
-TARGET_COLUMNS = ["spx_ret_fwd5", "spx_ret_fwd1"]
+TARGET_COLUMNS = ["spx_ret_fwd5", "spx_ret_fwd1", "spx_cum_fwd5", "spx_cum_fwd10", "spx_cum_fwd20"]
 BP = 1e4
 
 
@@ -55,6 +57,8 @@ def targets(spx: pd.DataFrame) -> pd.DataFrame:
     t = pd.DataFrame(index=spx.index)
     t["spx_ret_fwd5"] = sum(r.shift(-k) for k in range(1, 6)) / 5 * BP
     t["spx_ret_fwd1"] = r.shift(-1) * BP
+    for h in (5, 10, 20):  # t の終値 → t+h の終値(累積リターン)
+        t[f"spx_cum_fwd{h}"] = (spx["close"].shift(-h) / spx["close"] - 1) * BP
     return t
 
 

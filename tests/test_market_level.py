@@ -57,3 +57,25 @@ def test_targets_are_forward_means_in_bp():
     assert t.loc[i, "spx_ret_fwd1"] == pytest.approx(r.iloc[i + 1] * 1e4)
     assert t["spx_ret_fwd5"].iloc[-5:].isna().all() and not np.isnan(t["spx_ret_fwd5"].iloc[-6])
     assert t["spx_ret_fwd1"].iloc[-1:].isna().all()
+
+
+def test_cumulative_target_is_close_to_close_over_five_days():
+    macro = make_macro()
+    _, targ = ml.build_market_level(macro)
+    s = macro[macro["ticker"] == "^GSPC"].reset_index(drop=True)
+    t = targ.reset_index(drop=True)
+    i = 100
+    assert t.loc[i, "spx_cum_fwd5"] == pytest.approx((s["close"].iloc[i + 5] / s["close"].iloc[i] - 1) * 1e4)
+    assert t.loc[i, "spx_cum_fwd5"] != pytest.approx((s["close"].iloc[i + 4] / s["close"].iloc[i - 1] - 1) * 1e4)  # t より前を含まない
+    assert t["spx_cum_fwd5"].iloc[-5:].isna().all() and not np.isnan(t["spx_cum_fwd5"].iloc[-6])
+
+
+def test_cumulative_targets_for_10_and_20_days():
+    macro = make_macro()
+    _, targ = ml.build_market_level(macro)
+    s = macro[macro["ticker"] == "^GSPC"].reset_index(drop=True)
+    t = targ.reset_index(drop=True)
+    i = 100
+    for h in (10, 20):
+        assert t.loc[i, f"spx_cum_fwd{h}"] == pytest.approx((s["close"].iloc[i + h] / s["close"].iloc[i] - 1) * 1e4)
+        assert t[f"spx_cum_fwd{h}"].iloc[-h:].isna().all() and not np.isnan(t[f"spx_cum_fwd{h}"].iloc[-h - 1])

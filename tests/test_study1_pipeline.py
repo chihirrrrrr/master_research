@@ -48,6 +48,17 @@ def test_all_periods_also_needs_final_and_splits_dev_and_confirm():
     assert r["pooled_dev"]["n_test"] + r["pooled_confirm"]["n_test"] == r["pooled"]["n_test"]
 
 
+def test_simple80_is_one_time_ordered_split_with_a_gap_and_needs_final():
+    with pytest.raises(SystemExit):
+        run(1.0, periods="simple80", final=False)
+    r = run(1.0, periods="simple80", final=True)
+    (f,) = r["folds"]
+    n = r["n_rows"]
+    cut = int(round(n * 0.8))
+    assert f["n_test"] == n - cut and f["n_train"] == cut - SPLIT["embargo_days"]  # 後ろ20%がテスト、境界に4行の空き
+    assert r["pooled"]["n_test"] == n - cut
+
+
 def test_model_learns_a_real_signal_and_not_noise():
     assert run(1.0)["pooled"]["r2_os"] > 0.15          # 信号が強ければ、履歴平均より大きく良い
     assert run(0.0)["pooled"]["r2_os"] < 0.02          # 信号がなければ、履歴平均を超えない(過学習していない)
@@ -81,3 +92,29 @@ def test_xgboost_smoke_if_available():
     except Exception:
         pytest.skip("XGBoostが動かない環境(libomp が未インストール)")
     assert run(1.0, kind="xgboost")["pooled"]["r2_os"] > 0.1
+
+
+def test_drop_removes_columns_but_keeps_rows(tmp_path, monkeypatch):
+    base = pd.DataFrame({"date": pd.bdate_range("2020-01-01", periods=6), "spx_ret_1d": 1.0, "tnx_level": 2.0,
+                         "spx_ret_fwd5": 0.1})
+    base.to_parquet(tmp_path / "market_features.parquet")
+    monkeypatch.setattr(study1, "PROC", tmp_path)
+    monkeypatch.setattr(study1.ml, "MARKET_FEATURES", ["spx_ret_1d", "tnx_level"])
+    monkeypatch.setattr(study1, "load_dataset", study1.load_dataset)
+    (tmp_path / "market_targets.parquet").write_bytes(b"")
+    pd.DataFrame({"date": base["date"], "spx_ret_fwd5": base["spx_ret_fwd5"]}).to_parquet(tmp_path / "market_targets.parquet")
+    pd.read_parquet(tmp_path / "market_features.parquet").drop(columns="spx_ret_fwd5").to_parquet(tmp_path / "market_features.parquet")
+    df, cols = study1.load_dataset("numeric", "spx_ret_fwd5", "numeric", drop=("tnx_level",))
+    assert cols == ["spx_ret_1d"] and len(df) == 6
+    with pytest.raises(ValueError):
+        study1.load_dataset("numeric", "spx_ret_fwd5", "numeric", drop=("nope",))
+
+
+def test_embargo_can_be_set_per_model_config():
+    model = {**MODEL, "embargo_days": 19}
+    r = study1.run("numeric", "dev", kind="hgb", row_set="numeric", out_root=False,
+                   dataset=synthetic(1.0), split=SPLIT, model=model)
+    dates = synthetic(1.0)[0]["date"]
+    for f in r["folds"]:  # 学習の最後の行とテスト年の最初の行の間に、19行の空き
+        first_test = dates[dates.dt.year == f["year"]].index[0]
+        assert first_test - f["n_train"] == 19

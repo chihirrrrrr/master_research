@@ -1,0 +1,123 @@
+{
+  "feature_set": "numeric",
+  "periods": "simple80",
+  "model": "xgboost",
+  "target": "spx_ret_fwd5",
+  "n_features": 18,
+  "features": [
+    "spx_ret_1d",
+    "spx_ret_5d",
+    "spx_rv_20d",
+    "vix_level",
+    "vix_chg_1d",
+    "vix_term",
+    "tnx_level",
+    "tnx_chg_5d",
+    "term_spread",
+    "wti_ret_5d",
+    "copper_ret_5d",
+    "gold_ret_5d",
+    "sox_minus_nasdaq_5d",
+    "dow",
+    "month",
+    "spx_range_1d",
+    "spx_gap_1d",
+    "spx_close_loc"
+  ],
+  "row_set": "common",
+  "n_rows": 3211,
+  "first_date": "2008-01-31",
+  "last_date": "2021-12-23",
+  "folds": [
+    {
+      "year": "simple80",
+      "n_train": 2565,
+      "n_test": 642,
+      "best": {
+        "max_depth": 2,
+        "min_child_weight": 50,
+        "n_estimators": 30,
+        "inner_val_rmse": 35.67989598190105
+      },
+      "r2_os": 0.0031945840526852454,
+      "rmse_model": 56.22270301412605,
+      "rmse_hist": 56.312722828757856,
+      "corr": 0.039055314840362045,
+      "hit_model": 0.6526479750778816,
+      "hit_hist": 0.6526479750778816,
+      "train": {
+        "r2_in": 0.023292825987804355,
+        "rmse": 49.25515564222993,
+        "corr": 0.3250282964362557,
+        "direction": {
+          "accuracy": 0.6202729044834308,
+          "balanced_accuracy": 0.5246178293341809,
+          "f1_up": 0.7578319244157136,
+          "auc": 0.578403623073256,
+          "pred_up_share": 0.9637426900584796,
+          "always_up_accuracy": 0.6042884990253411,
+          "always_up_f1": 0.7533414337788579,
+          "pred_std": 1.8973020727763095,
+          "y_std": 49.83902147355704
+        }
+      }
+    }
+  ],
+  "pooled": {
+    "n_test": 642,
+    "r2_os": 0.0031945840526852454,
+    "rmse_model": 56.22270301412605,
+    "rmse_hist": 56.312722828757856,
+    "corr": 0.039055314840362045,
+    "hit_model": 0.6526479750778816,
+    "hit_hist": 0.6526479750778816,
+    "up_share": 0.6526479750778816,
+    "clark_west_vs_hist": {
+      "mean": 12.021994470540589,
+      "t": 0.7158921471796333,
+      "p_one_sided": 0.23702897386442845,
+      "lag": 5
+    },
+    "direction": {
+      "accuracy": 0.6526479750778816,
+      "balanced_accuracy": 0.5,
+      "f1_up": 0.7898209236569275,
+      "auc": 0.5302877874931773,
+      "pred_up_share": 1.0,
+      "always_up_accuracy": 0.6526479750778816,
+      "always_up_f1": 0.7898209236569275,
+      "pred_std": 1.1654170545692455,
+      "y_std": 56.113433775842175
+    }
+  },
+  "importance_top": {
+    "tnx_level": 0.16570405662059784,
+    "vix_term": 0.09926565736532211,
+    "copper_ret_5d": 0.08751194179058075,
+    "spx_ret_5d": 0.08008124679327011,
+    "vix_level": 0.07954548299312592,
+    "spx_rv_20d": 0.07688990980386734,
+    "month": 0.0719868615269661,
+    "spx_close_loc": 0.06423865258693695
+  },
+  "shap_mean_abs_test": {
+    "tnx_level": 0.4412144124507904,
+    "vix_level": 0.34497955441474915,
+    "spx_rv_20d": 0.290338933467865,
+    "copper_ret_5d": 0.2540305256843567,
+    "vix_term": 0.2403550148010254,
+    "spx_close_loc": 0.11227237433195114,
+    "spx_ret_5d": 0.10956264287233353,
+    "spx_ret_1d": 0.10720677673816681,
+    "tnx_chg_5d": 0.08678915351629257,
+    "spx_range_1d": 0.07446340471506119,
+    "vix_chg_1d": 0.06429316103458405,
+    "wti_ret_5d": 0.028891533613204956,
+    "spx_gap_1d": 0.020049870014190674,
+    "month": 0.019081903621554375,
+    "sox_minus_nasdaq_5d": 0.012189650908112526,
+    "dow": 0.006479982286691666,
+    "term_spread": 0.0033006162848323584,
+    "gold_ret_5d": 0.002383840037509799
+  }
+}

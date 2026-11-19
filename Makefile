@@ -3,7 +3,7 @@ PYTHON ?= python3.12
 VENV   := .venv
 PY     := $(VENV)/bin/python
 
-.PHONY: help env env-nlp verify test freeze fetch features market-base market-features nyt-features study1-dev study1-all
+.PHONY: help env env-nlp verify test freeze fetch features market-base market-features nyt-features study1-dev study1-all analysis
 
 help:
 	@echo "make env      .venv を作り、requirements.txt を入れる"
@@ -63,3 +63,10 @@ study1-all:
 	$(PY) -m src.models.study1 --features numeric+nyt --periods all --final --model-config configs/study1_xgb_reg1.yaml --name study1_numeric_nyt_reg1_all
 	$(PY) -m src.models.study1 --features numeric --periods all --final --model-config configs/study1_xgb_reg2.yaml --name study1_numeric_reg2_all
 	$(PY) -m src.models.study1 --features numeric+nyt --periods all --final --model-config configs/study1_xgb_reg2.yaml --name study1_numeric_nyt_reg2_all
+
+analysis:
+	$(PY) -m src.analysis.label_balance --out results/analysis/label_balance.md
+	$(PY) -m src.analysis.feature_distribution --out results/analysis/feature_distribution.md
+	$(PY) -m src.analysis.summarize_runs $(wildcard results/runs/20261008_study1_numeric_reg1_all) $(wildcard results/runs/20261008_study1_numeric_nyt_reg1_all) --out results/analysis/per_year_reg1.md
+	$(PY) -m src.analysis.compare_horizons --out results/analysis/horizon_compare.md
+	$(PY) -m src.analysis.target_relation --out results/analysis/target_relation.md
